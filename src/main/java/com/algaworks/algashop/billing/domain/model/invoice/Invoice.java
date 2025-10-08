@@ -40,7 +40,7 @@ public class Invoice {
     @Id
     @EqualsAndHashCode.Include
     private UUID id;
-    private String OrderId;
+    private String orderId;
     private UUID customerId;
     
     private OffsetDateTime issuedAt;
