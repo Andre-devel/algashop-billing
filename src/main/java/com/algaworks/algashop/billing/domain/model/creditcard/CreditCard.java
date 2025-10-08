@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class CreditCart {
+public class CreditCard {
     
     @Id
     @EqualsAndHashCode.Include
@@ -35,7 +35,7 @@ public class CreditCart {
     
     private String gatewayCode;
     
-    public static CreditCart brandNew(UUID customerId, String lastNumbers, String brand, Integer expMonth, Integer expYear, String gatewayCreditCardCode) {
+    public static CreditCard brandNew(UUID customerId, String lastNumbers, String brand, Integer expMonth, Integer expYear, String gatewayCreditCardCode) {
         Objects.requireNonNull(customerId);
         Objects.requireNonNull(expMonth);
         Objects.requireNonNull(expYear);
@@ -44,7 +44,7 @@ public class CreditCart {
             throw new IllegalArgumentException("Last numbers, brand, and gateway credit card code must be provided");
         }
         
-        return new CreditCart(
+        return new CreditCard(
                 IdGenerator.generateTimeBasedUUID(),
                 OffsetDateTime.now(),
                 customerId,
