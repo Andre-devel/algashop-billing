@@ -7,8 +7,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Setter(AccessLevel.PRIVATE)
@@ -27,10 +29,17 @@ public class CreditCart {
     private Integer expMonth;
     private Integer expYear;
     
-    @Setter(AccessLevel.PUBLIC)
     private String gatewayCode;
     
     public static CreditCart brandNew(UUID customerId, String lastNumbers, String brand, Integer expMonth, Integer expYear, String gatewayCreditCardCode) {
+        Objects.requireNonNull(customerId);
+        Objects.requireNonNull(expMonth);
+        Objects.requireNonNull(expYear);
+        
+        if (StringUtils.isAnyBlank(lastNumbers, brand, gatewayCreditCardCode)) {
+            throw new IllegalArgumentException("Last numbers, brand, and gateway credit card code must be provided");
+        }
+        
         return new CreditCart(
                 IdGenerator.generateTimeBasedUUID(),
                 OffsetDateTime.now(),
@@ -41,5 +50,17 @@ public class CreditCart {
                 expYear,
                 gatewayCreditCardCode
         );
+    }
+    
+    public void setGatewayCode(String gatewayCode) {
+        if (StringUtils.isBlank(gatewayCode)) {
+            throw new IllegalArgumentException("Gateway code cannot be null or empty");
+        }
+        
+        if (this.gatewayCode != null) {
+            throw new IllegalStateException("Gateway code has already been assigned");
+        }
+        
+        this.gatewayCode = gatewayCode;
     }
 }

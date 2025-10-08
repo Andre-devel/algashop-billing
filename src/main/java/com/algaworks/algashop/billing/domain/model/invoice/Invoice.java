@@ -8,11 +8,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,6 +48,18 @@ public class Invoice {
     private String cancelReason;
     
     public static Invoice issue(String orderID, UUID customerId, Payer payer, Set<LineItem> items) {
+        Objects.requireNonNull(customerId);
+        Objects.requireNonNull(payer);
+        Objects.requireNonNull(items);
+        
+        if (StringUtils.isBlank(orderID)) {
+            throw new IllegalArgumentException("Order ID must be provided");
+        }
+        
+        if (items.isEmpty()) {
+            throw new IllegalArgumentException("At least one line item must be provided");
+        }
+        
         BigDecimal totalAmount = items.stream().map(LineItem::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         return new Invoice(
                 IdGenerator.generateTimeBasedUUID(),
@@ -98,10 +112,15 @@ public class Invoice {
         this.setStatus(InvoiceStatus.CANCELED);
         this.setCancelReason(reason);
     }
-    
+
     public void assignPaymentGatewayCode(String code) {
         if (!isUnpaid()) {
-            throw new DomainException("Invoice %s with status %s cannot be edited".formatted(this.getId(), this.getStatus().toString().toLowerCase()));
+            throw new DomainException(String.format("Invoice %s with status %s cannot be edited",
+                    this.getId(), this.getStatus().toString().toLowerCase()));
+        }
+        
+        if (this.getPaymentSettings() == null) { 
+            throw new DomainException("Invoice has no payment settings");
         }
         
         this.getPaymentSettings().assignGatewayCode(code);

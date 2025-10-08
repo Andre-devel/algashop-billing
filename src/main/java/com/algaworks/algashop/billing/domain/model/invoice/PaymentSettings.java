@@ -7,7 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Setter(AccessLevel.PRIVATE)
@@ -23,7 +25,13 @@ public class PaymentSettings {
     private String gatewayCode;
     private PaymentMethod paymentMethod;
 
-    public static PaymentSettings brandNew(PaymentMethod method, UUID creditCardId) {
+    static PaymentSettings brandNew(PaymentMethod method, UUID creditCardId) {
+        Objects.requireNonNull(method);
+        
+        if (method == PaymentMethod.CREDIT_CARD) {
+            Objects.requireNonNull(creditCardId, "Credit card ID must be provided for credit card payments");
+        }
+        
         return new PaymentSettings(
                 IdGenerator.generateTimeBasedUUID(),
                 creditCardId,
@@ -33,6 +41,14 @@ public class PaymentSettings {
     }
     
     void assignGatewayCode(String gatewayCode) {
+        if (StringUtils.isBlank(gatewayCode)) {
+            throw new IllegalArgumentException("Gateway code cannot be null or empty");
+        }
+        
+        if (this.gatewayCode != null) {
+            throw new IllegalStateException("Gateway code has already been assigned");
+        }
+        
         setGatewayCode(gatewayCode);
     }
 }
