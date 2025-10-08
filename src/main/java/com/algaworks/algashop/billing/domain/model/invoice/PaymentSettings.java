@@ -31,4 +31,8 @@ public class PaymentSettings {
                 method
         );
     }
+    
+    void assignGatewayCode(String gatewayCode) {
+        setGatewayCode(gatewayCode);
+    }
 }
