@@ -1,6 +1,8 @@
 package com.algaworks.algashop.billing.domain.model.creditcard;
 
+import com.algaworks.algashop.billing.domain.model.IdGenerator;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +15,7 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreditCart {
     
     @EqualsAndHashCode.Include
@@ -21,9 +24,22 @@ public class CreditCart {
     private UUID customerId;
     private String lastNumbers;
     private String brand;
-    private String expMonth;
-    private String expYear;
+    private Integer expMonth;
+    private Integer expYear;
     
     @Setter(AccessLevel.PUBLIC)
     private String gatewayCode;
+    
+    public static CreditCart brandNew(UUID customerId, String lastNumbers, String brand, Integer expMonth, Integer expYear, String gatewayCreditCardCode) {
+        return new CreditCart(
+                IdGenerator.generateTimeBasedUUID(),
+                OffsetDateTime.now(),
+                customerId,
+                lastNumbers,
+                brand,
+                expMonth,
+                expYear,
+                gatewayCreditCardCode
+        );
+    }
 }
