@@ -1,7 +1,7 @@
 package com.algaworks.algashop.billing.domain.model.invoice;
 
+import com.algaworks.algashop.billing.domain.model.FieldValidations;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,8 +12,6 @@ import lombok.Setter;
 @Setter(AccessLevel.PRIVATE)
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Address {
     private String street;
     private String number;
@@ -22,4 +20,22 @@ public class Address {
     private String city;
     private String state;
     private String zipCode;
+
+    @Builder
+    public Address(String street, String number, String complement, String neighborhood, String city, String state, String zipCode) {
+        FieldValidations.requiresNonBlank(street);
+        FieldValidations.requiresNonBlank(neighborhood);
+        FieldValidations.requiresNonBlank(city);
+        FieldValidations.requiresNonBlank(number);
+        FieldValidations.requiresNonBlank(state);
+        FieldValidations.requiresNonBlank(zipCode);
+        
+        this.street = street;
+        this.number = number;
+        this.complement = complement;
+        this.neighborhood = neighborhood;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+    }
 }
