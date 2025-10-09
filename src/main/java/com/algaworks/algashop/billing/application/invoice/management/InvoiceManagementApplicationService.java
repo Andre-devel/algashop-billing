@@ -4,11 +4,14 @@ import com.algaworks.algashop.billing.domain.model.creditcard.CreditCardNotFound
 import com.algaworks.algashop.billing.domain.model.creditcard.CreditCardRepository;
 import com.algaworks.algashop.billing.domain.model.invoice.Address;
 import com.algaworks.algashop.billing.domain.model.invoice.Invoice;
+import com.algaworks.algashop.billing.domain.model.invoice.InvoiceNotFoundException;
 import com.algaworks.algashop.billing.domain.model.invoice.InvoiceRepository;
 import com.algaworks.algashop.billing.domain.model.invoice.InvoicingService;
 import com.algaworks.algashop.billing.domain.model.invoice.LineItem;
 import com.algaworks.algashop.billing.domain.model.invoice.Payer;
+import com.algaworks.algashop.billing.domain.model.invoice.payament.Payment;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentGatewayService;
+import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,38 @@ public class InvoiceManagementApplicationService {
         invoiceRepository.saveAndFlush(invoice);
         
         return invoice.getId();
+    }
+    
+    @Transactional
+    public void processPayment(UUID invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new InvoiceNotFoundException(String.format("Invoice with ID %s not found.", invoiceId)));
+        
+        PaymentRequest paymentRequest = toPaymentRequest(invoice);
+        
+        Payment payment;
+        try {
+            payment = paymentGatewayService.caputre(paymentRequest);
+        } catch (Exception e) {
+            String errorMessage = "Payment capture failed";
+            log.error(errorMessage, e);
+            invoice.cancel(errorMessage);
+            invoiceRepository.save(invoice);
+            return;
+        }
+        
+        invoicingService.assignPayment(invoice, payment);
+        invoiceRepository.saveAndFlush(invoice);
+    }
+
+    private PaymentRequest toPaymentRequest(Invoice invoice) {
+        return PaymentRequest.builder()
+                .amount(invoice.getTotalAmount())
+                .method(invoice.getPaymentSettings().getPaymentMethod())
+                .creditCardId(invoice.getPaymentSettings().getCreditCardId())
+                .payer(invoice.getPayer())
+                .invoiceId(invoice.getId())
+                .build();
     }
 
     private Set<LineItem> convertToLineItems(Set<LineItemInput> itemsInput) {
