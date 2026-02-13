@@ -58,7 +58,7 @@ public class Invoice extends AbstractAuditableAggregateRoot<Invoice> {
     private PaymentSettings paymentSettings;
     
     @ElementCollection
-    @CollectionTable(name = "invoice_line_items", joinColumns = @JoinColumn(name = "invoice_id"))
+    @CollectionTable(name = "invoice_line_item", joinColumns = @JoinColumn(name = "invoice_id"))
     private Set<LineItem> items = new HashSet<>();
     
     @Embedded

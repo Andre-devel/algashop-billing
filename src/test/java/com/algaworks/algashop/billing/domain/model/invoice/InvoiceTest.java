@@ -64,7 +64,7 @@ class InvoiceTest {
         
         invoice.changePaymentSettings(paymentMethod, creditCardId);
         
-        Assertions.assertThat(invoice.getPaymentSettings().getPaymentMethod()).isEqualTo(paymentMethod);
+        Assertions.assertThat(invoice.getPaymentSettings().getMethod()).isEqualTo(paymentMethod);
         Assertions.assertThat(invoice.getPaymentSettings().getCreditCardId()).isEqualTo(creditCardId);
     }
     

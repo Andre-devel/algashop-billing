@@ -116,7 +116,7 @@ class InvoiceManagementApplicationServiceIT {
 
         Payment payment = Payment.builder().gatewayCode("123")
                 .invoiceId(invoice.getId())
-                .method(invoice.getPaymentSettings().getPaymentMethod())
+                .method(invoice.getPaymentSettings().getMethod())
                 .status(PaymentStatus.PAID)
                 .build();
 
@@ -143,7 +143,7 @@ class InvoiceManagementApplicationServiceIT {
 
         Payment payment = Payment.builder().gatewayCode("123")
                 .invoiceId(invoice.getId())
-                .method(invoice.getPaymentSettings().getPaymentMethod())
+                .method(invoice.getPaymentSettings().getMethod())
                 .status(PaymentStatus.FAILED)
                 .build();
 

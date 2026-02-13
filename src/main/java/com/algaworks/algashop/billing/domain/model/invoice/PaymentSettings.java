@@ -32,7 +32,7 @@ public class PaymentSettings {
     private String gatewayCode;
     
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentMethod method;
     
     @OneToOne(mappedBy = "paymentSettings")
     @Getter(AccessLevel.PRIVATE)
