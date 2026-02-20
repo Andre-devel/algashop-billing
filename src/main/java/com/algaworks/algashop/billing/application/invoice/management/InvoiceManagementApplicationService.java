@@ -12,6 +12,7 @@ import com.algaworks.algashop.billing.domain.model.invoice.Payer;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.Payment;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentGatewayService;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentRequest;
+import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,14 @@ public class InvoiceManagementApplicationService {
         }
         
         invoicingService.assignPayment(invoice, payment);
+        invoiceRepository.saveAndFlush(invoice);
+    }
+
+    @Transactional
+    public void updatePaymentStatus(UUID invoiceId, PaymentStatus paymentStatus) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new InvoiceNotFoundException(String.format("Invoice with ID %s not found.", invoiceId)));
+        invoice.updatePaymentStatus(paymentStatus);
         invoiceRepository.saveAndFlush(invoice);
     }
 

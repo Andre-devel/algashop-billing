@@ -24,10 +24,6 @@ public class InvoicingService {
     
     public void assignPayment(Invoice invoice, Payment payment) {
         invoice.assignPaymentGatewayCode(payment.getGatewayCode());
-        switch (payment.getStatus()) {
-            case FAILED -> invoice.cancel("Payment failed");
-            case REFUNDED -> invoice.cancel("Payment refunded");
-            case PAID -> invoice.markAsPaid();
-        }
+        invoice.updatePaymentStatus(payment.getStatus());
     }
 }

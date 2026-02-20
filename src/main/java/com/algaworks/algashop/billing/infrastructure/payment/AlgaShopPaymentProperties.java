@@ -31,5 +31,8 @@ public class AlgaShopPaymentProperties {
 
         @NotBlank
         private String privateToken;
+
+        @NotBlank
+        private String webhookUrl;
     }
 }
