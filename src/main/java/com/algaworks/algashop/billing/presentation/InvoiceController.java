@@ -4,6 +4,8 @@ import com.algaworks.algashop.billing.application.invoice.management.GenerateInv
 import com.algaworks.algashop.billing.application.invoice.management.InvoiceManagementApplicationService;
 import com.algaworks.algashop.billing.application.invoice.query.InvoiceOutPut;
 import com.algaworks.algashop.billing.application.invoice.query.InvoiceQueryService;
+import com.algaworks.algashop.billing.domain.model.BadGatewayException;
+import com.algaworks.algashop.billing.domain.model.GatewayTimeoutException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,25 +25,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class InvoiceController {
-    
+
     private final InvoiceQueryService invoiceQueryService;
     private final InvoiceManagementApplicationService invoiceManagementApplicationService;
-    
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public InvoiceOutPut generate(@PathVariable String orderId, @Valid @RequestBody GenerateInvoiceInput input) {
         input.setOrderId(orderId);
-        
+
         UUID invoiceId = invoiceManagementApplicationService.generate(input);
         try {
             invoiceManagementApplicationService.processPayment(invoiceId);
+        } catch (GatewayTimeoutException | BadGatewayException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error processing payment for invoice {}", invoiceId, e);
         }
 
         return invoiceQueryService.findByOrderId(orderId);
     }
-    
+
     @GetMapping
     public InvoiceOutPut findOrder(@PathVariable String orderId) {
         return invoiceQueryService.findByOrderId(orderId);

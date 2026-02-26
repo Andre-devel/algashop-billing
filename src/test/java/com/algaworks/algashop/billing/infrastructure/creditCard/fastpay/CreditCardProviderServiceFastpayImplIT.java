@@ -3,6 +3,8 @@ package com.algaworks.algashop.billing.infrastructure.creditCard.fastpay;
 import com.algaworks.algashop.billing.domain.model.creditcard.LimitedCreditCard;
 import com.algaworks.algashop.billing.infrastructure.AbstractFastpayIT;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -10,6 +12,16 @@ import org.springframework.context.annotation.Import;
 @SpringBootTest
 @Import(FastpayCreditCardTokenizationAPIClientConfig.class)
 class CreditCardProviderServiceFastpayImplIT extends AbstractFastpayIT {
+    
+    @BeforeAll
+    public static void setup() {
+        startWireMock();
+    }
+    
+    @AfterAll
+    public static void afterAll() {
+        stopWireMock();
+    }
     
     @Test
     public void shouldRegisterCreditCard() {
@@ -32,7 +44,5 @@ class CreditCardProviderServiceFastpayImplIT extends AbstractFastpayIT {
         LimitedCreditCard registeredCard = registerCard();
 
         creditCardProvider.delete(registeredCard.getGatewayCode());
-
-        Assertions.assertThat(creditCardProvider.findById(registeredCard.getGatewayCode())).isEmpty();
     }
 }

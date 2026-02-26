@@ -1,5 +1,7 @@
 package com.algaworks.algashop.billing.application.invoice.management;
 
+import com.algaworks.algashop.billing.domain.model.BadGatewayException;
+import com.algaworks.algashop.billing.domain.model.GatewayTimeoutException;
 import com.algaworks.algashop.billing.domain.model.creditcard.CreditCardNotFoundException;
 import com.algaworks.algashop.billing.domain.model.creditcard.CreditCardRepository;
 import com.algaworks.algashop.billing.domain.model.invoice.Address;
@@ -9,6 +11,7 @@ import com.algaworks.algashop.billing.domain.model.invoice.InvoiceRepository;
 import com.algaworks.algashop.billing.domain.model.invoice.InvoicingService;
 import com.algaworks.algashop.billing.domain.model.invoice.LineItem;
 import com.algaworks.algashop.billing.domain.model.invoice.Payer;
+import com.algaworks.algashop.billing.domain.model.invoice.PaymentMethod;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.Payment;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentGatewayService;
 import com.algaworks.algashop.billing.domain.model.invoice.payament.PaymentRequest;
@@ -36,8 +39,15 @@ public class InvoiceManagementApplicationService {
     @Transactional
     public UUID generate(GenerateInvoiceInput input) {
         PaymentSettingsInput paymentSettings = input.getPaymentSettings();
-        
-        verifyCreditCardId(paymentSettings.getCreditCardId());
+
+        if (PaymentMethod.CREDIT_CARD.equals(paymentSettings.getMethod())) {
+            UUID creditCardId = paymentSettings.getCreditCardId();
+            UUID customerId = input.getCustomerId();
+            if (!creditCardRepository.existsByIdAndCustomerId(creditCardId, customerId)) {
+                throw new CreditCardNotFoundException(String.format("Credit card %s not found", creditCardId));
+            }
+        }
+
         Payer payer = convertToPayer(input.getPayer());
         
         Set<LineItem> items =  convertToLineItems(input.getItems());
@@ -60,6 +70,8 @@ public class InvoiceManagementApplicationService {
         Payment payment;
         try {
             payment = paymentGatewayService.caputre(paymentRequest);
+        } catch (GatewayTimeoutException | BadGatewayException e) {
+            throw e;
         } catch (Exception e) {
             String errorMessage = "Payment capture failed";
             log.error(errorMessage, e);
@@ -125,9 +137,4 @@ public class InvoiceManagementApplicationService {
                 .build();
     }
 
-    private void verifyCreditCardId(UUID creditCardId) {
-        if (creditCardId != null && !creditCardRepository.existsById(creditCardId)) {
-            throw new CreditCardNotFoundException(String.format("Credit card with ID %s does not exist.", creditCardId));
-        }
-    }
 }

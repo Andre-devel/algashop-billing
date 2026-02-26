@@ -1,5 +1,8 @@
 package com.algaworks.algashop.billing.application.invoice.management;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,10 +15,21 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GenerateInvoiceInput{
+public class GenerateInvoiceInput {
     private String orderId;
+
+    @NotNull
     private UUID customerId;
+
+    @Valid
+    @NotNull
     private PaymentSettingsInput paymentSettings;
+
+    @Valid
+    @NotNull
     private PayerData payer;
+
+    @Valid
+    @NotEmpty
     private List<LineItemInput> items;
 }
